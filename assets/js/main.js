@@ -1,882 +1,441 @@
-; (function ($) {
+/**
+ * RetinaLogo
+ * Contact Form
+ * Header Fixed
+ * alert box
+ */
 
-  $(document).ready(function () {
+(function ($) {
+  "use strict";
 
-    showform();
-    //========== HEADER ACTIVE STRATS ============= //
-    if ($("#header").length > 0) {
-      $(window).on("scroll", function (event) {
-        var scroll = $(window).scrollTop();
-        if (scroll < 1) {
-          $(".header-area").removeClass("sticky");
-        } else {
-          $(".header-area").addClass("sticky");
-        }
+  var themesflatTheme = {
+    // Main init function
+    init: function () {
+      this.config();
+      this.events();
+    },
+
+    // Define vars for caching
+    config: function () {
+      this.config = {
+        $window: $(window),
+        $document: $(document),
+      };
+    },
+
+    // Events
+    events: function () {
+      var self = this;
+
+      // Run on document ready
+      self.config.$document.on("ready", function () {
+        // Retina Logos
+        self.retinaLogo();
+      });
+
+      // Run on Window Load
+      self.config.$window.on("load", function () {});
+    },
+  }; // end themesflatTheme
+
+  // Start things up
+  themesflatTheme.init();
+
+  /* RetinaLogo
+  ------------------------------------------------------------------------------------- */
+  var retinaLogos = function () {
+    var retina = window.devicePixelRatio > 1 ? true : false;
+    if (retina) {
+      $("#site-logo-inner").find("img").attr({
+        src: "assets/images/logo/logo@2x.png",
+        width: "197",
+        height: "48",
+      });
+
+      $("#logo-footer.style").find("img").attr({
+        src: "assets/images/logo/logo-footer@2x.png",
+        width: "197",
+        height: "48",
+      });
+      $("#logo-footer.style2").find("img").attr({
+        src: "assets/images/logo/logo@2x.png",
+        width: "197",
+        height: "48",
       });
     }
-    //========== HEADER ACTIVE ENDS ============= //
-
-    //========== SIDEBAR/SEARCH AREA ============= //
-    $(".header-search-btn").on("click", function (e) {
-      e.preventDefault();
-      $(".header-search-form-wrapper").addClass("open");
-      $('.header-search-form-wrapper input[type="search"]').focus();
-      $('.body-overlay').addClass('active');
-    });
-    $(".tx-search-close").on("click", function (e) {
-      e.preventDefault();
-      $(".header-search-form-wrapper").removeClass("open");
-      $("body").removeClass("active");
-      $('.body-overlay').removeClass('active');
-    });
-    $('#mobile-menu-active').metisMenu();
-    $('#mobile-menu-active .dropdown > a').on('click', function (e) {
-      e.preventDefault();
-    });
-    $(".hamburger_menu").on("click", function (e) {
-      e.preventDefault();
-      $(".slide-bar").toggleClass("show");
-      $("body").addClass("on-side");
-      $('.body-overlay').addClass('active');
-      $(this).addClass('active');
-    });
-    $(".close-mobile-menu > a").on("click", function (e) {
-      e.preventDefault();
-      $(".slide-bar").removeClass("show");
-      $("body").removeClass("on-side");
-      $('.body-overlay').removeClass('active');
-      $('.hamburger_menu').removeClass('active');
-    });
-    //========== SIDEBAR/SEARCH AREA ============= //
-
-    //========== PAGE PROGRESS STARTS ============= // 
-    var progressPath = document.querySelector(".progress-wrap path");
-    var pathLength = progressPath.getTotalLength();
-    progressPath.style.transition = progressPath.style.WebkitTransition =
-      "none";
-    progressPath.style.strokeDasharray = pathLength + " " + pathLength;
-    progressPath.style.strokeDashoffset = pathLength;
-    progressPath.getBoundingClientRect();
-    progressPath.style.transition = progressPath.style.WebkitTransition =
-      "stroke-dashoffset 10ms linear";
-    var updateProgress = function () {
-      var scroll = $(window).scrollTop();
-      var height = $(document).height() - $(window).height();
-      var progress = pathLength - (scroll * pathLength) / height;
-      progressPath.style.strokeDashoffset = progress;
-    };
-    updateProgress();
-    $(window).scroll(updateProgress);
-    var offset = 50;
-    var duration = 550;
-    jQuery(window).on("scroll", function () {
-      if (jQuery(this).scrollTop() > offset) {
-        jQuery(".progress-wrap").addClass("active-progress");
-      } else {
-        jQuery(".progress-wrap").removeClass("active-progress");
-      }
-    });
-    jQuery(".progress-wrap").on("click", function (event) {
-      event.preventDefault();
-      jQuery("html, body").animate({ scrollTop: 0 }, duration);
-      return false;
-    });
-    //========== PAGE PROGRESS STARTS ============= // 
-
-    //========== VIDEO POPUP STARTS ============= //
-    if ($(".popup-youtube").length > 0) {
-      $(".popup-youtube").magnificPopup({
-        type: "iframe",
-      });
-    }
-    //========== VIDEO POPUP ENDS ============= //
-
-    //========== AOS_ANIMATION STARTS ============= //
-    AOS.init;
-    AOS.init({ disable: 'mobile' });
-    //========== AOS_ANIMATION ENDS ============= //
-
-    //========== NICE SELECT ============= //
-    $('select').niceSelect();
-
-    //========== CASE IMAGE ============= //
-    $('.cs_hover_active').hover(function () {
-      $(this).addClass('active').siblings().removeClass('active');
-    });
-
-  });
-  //========== COUNTER UP============= //
-  const ucounter = $('.counter');
-  if (ucounter.length > 0) {
-    ucounter.countUp();
   };
-  //========== COUNTER UP============= //
 
-  //========== CLICK ============= //
-  const color = $(".heart");
-  color.on("click", function () {
-    $(".heart");
-    $(this).addClass("active");
-  });
-  //========== CLICK ============= //
+  /* Contact Form
+  ------------------------------------------------------------------------------------- */
+  var ajaxContactForm = function () {
+    $("#contactform").each(function () {
+      $(this).validate({
+        submitHandler: function (form) {
+          var $form = $(form),
+            str = $form.serialize(),
+            loading = $("<div />", { class: "loading" });
 
-  //========== TESTIMONIAL AREA ============= //
+          $.ajax({
+            type: "POST",
+            url: $form.attr("action"),
+            data: str,
+            beforeSend: function () {
+              $form.find(".send-wrap").append(loading);
+            },
+            success: function (msg) {
+              var result, cls;
+              if (msg === "Success") {
+                result =
+                  "Email Sent Successfully. Thank you, Your application is accepted - we will contact you shortly";
+                cls = "msg-success";
+              } else {
+                result = "Error sending email.";
+                cls = "msg-error";
+              }
+              $form.prepend(
+                $("<div />", {
+                  class: "flat-alert " + cls,
+                  text: result,
+                }).append(
+                  $(
+                    '<a class="close" href="#"><i class="icon icon-close2"></i></a>'
+                  )
+                )
+              );
 
-  //========== SLIDER ============= //
-  $(".hero-area-slider").slick({
-    autoplay: true,
-    autoplaySpeed: 2000,
-    speed: 1500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    pauseOnHover: false,
-    dots: false,
-    arrows: true,
-    pauseOnDotsHover: true,
-    cssEase: 'linear',
-    fade: true,
-    draggable: true,
-    prevArrow: $(".testimonial-prev-arrow"),
-    nextArrow: $(".testimonial-next-arrow"),
-  });
+              $form.find(":input").not(".submit").val("");
+            },
+            complete: function (xhr, status, error_thrown) {
+              $form.find(".loading").remove();
+            },
+          });
+        },
+      });
+    }); // each contactform
+  };
+  /* Header Fixed
+  ------------------------------------------------------------------------------------- */
+  var headerFixed = function () {
+    if ($("header").hasClass("header-fixed")) {
 
-  //========== SLIDER ============= //
-  $(".slider2").slick({
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    asNavFor: ".slider1",
-    dots: false,
-    arrows: false,
-    centerMode: false,
-    focusOnSelect: true,
-    fade: true,
-    loop: true,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    infinite: true,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          infinite: true,
-        }
-      },
-      {
-        breakpoint: 769,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1
-        }
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1
-        }
-      }
-    ]
-  });
+      var nav = $("#header");
+      if (nav.length) {
+        var offsetTop = nav.offset().top,
+          headerHeight = nav.height(),
+          injectSpace = $("<div>", {
+            height: headerHeight,
+          });
+        injectSpace.hide();
 
-  $(".slider1").slick({
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    arrows: true,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    loop: true,
-    focusOnSelect: true,
-    asNavFor: ".slider2",
-    infinite: true,
-    prevArrow: $('.next-arrow'),
-    nextArrow: $('.prev-arrow'),
-  });
-
-
-  //========== SLIDER ============= //
-  $('.property-single-slider').owlCarousel({
-    loop: true,
-    margin: 30,
-    nav: true,
-    dots: false,
-    items: 10,
-    autoplay: true,
-    navText: ["<i class='fa-solid fa-angle-left'></i>", "<i class='fa-solid fa-angle-right'></i>"],
-    smartSpeed: 2000,
-    autoplayTimeout: 3000,
-    responsiveClass: true,
-    responsive: {
-      0: {
-        items: 1,
-      },
-      600: {
-        items: 3,
-      },
-      1000: {
-        items: 5,
+        $(window).on("load scroll", function () {
+          if ($(window).scrollTop() > 0) {
+            nav.addClass("is-fixed");
+            injectSpace.show();
+            $("#trans-logo").attr("src", "images/logo/logo@2x.png");
+          } else {
+            nav.removeClass("is-fixed");
+            injectSpace.hide();
+            $("#trans-logo").attr("src", "images/logo/logo@2x-white.png");
+          }
+        });
       }
     }
-  });
+  };
 
-  $('.box-slider').slick({
-    slidesToScroll: 1,
-    arrows: true,
-    dots: false,
-    autoplay: true,
-    autoplaySpeed: 1500,
-    speed: 1000,
-    vertical: true,
-    verticalSwiping: true,
-    slidesToShow: 1,
-    autoplay: true,
-    prevArrow: $(".next-arrow"),
-    nextArrow: $(".prev-arrow"),
-    responsive: [
-      {
-        breakpoint: 1400,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          infinite: true,
-        }
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          infinite: true,
-        }
-      },
+  $("#showlogo").prepend(
+    '<a href="index.html"><img id="theImg" src="assets/images/logo/logo2.png" /></a>'
+  );
 
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        }
-      },
+  // =========NICE SELECT=========
+  $(".select_js").niceSelect();
 
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 2,
-        }
-      },
+  new WOW().init();
 
-      {
-        breakpoint: 375,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        }
-      },
+  //Submenu Dropdown Toggle
+  if ($(".main-header li.dropdown2 ul").length) {
+    $(".main-header li.dropdown2").append('<div class="dropdown2-btn"></div>');
 
-      {
-        breakpoint: 320,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        }
-      },
-    ]
-  });
-
-  //========== SLIDER ============= //
-  $(".hero2-slider-sectionarea").slick({
-    autoplay: true,
-    autoplaySpeed: 2500,
-    speed: 1500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    pauseOnHover: false,
-    asNavFor: ".hero2-small-img",
-    dots: false,
-    arrows: false,
-    pauseOnDotsHover: true,
-    cssEase: 'linear',
-    fade: true,
-    draggable: true,
-  });
-
-  $(".hero2-small-img").slick({
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    arrows: false,
-    autoplay: true,
-    vertical: true,
-    verticalSwiping: true,
-    autoplaySpeed: 2000,
-    loop: true,
-    focusOnSelect: true,
-    asNavFor: ".hero2-slider-sectionarea",
-    infinite: true,
-  });
-
-  //========== SLIDER ============= //
-  $(".slider-galeria").slick({
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    arrows: true,
-    infinite: false,
-    infinite: true,
-    asNavFor: '.slider-galeria-thumbs',
-    prevArrow: $('.testimonial-next-arrow'),
-    nextArrow: $('.testimonial-prev-arrow'),
-  });
-  $(".slider-galeria-thumbs").slick({
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    items: 15,
-    arrows: true,
-    asNavFor: ".slider-galeria",
-    vertical: true,
-    infinite: true,
-    verticalSwiping: true,
-    focusOnSelect: true,
-    infinite: false,
-    prevArrow: $('.testimonial-next-arrow'),
-    nextArrow: $('.testimonial-prev-arrow'),
-  });
-
-  //========== SLIDER ============= //
-  $(".images-area").slick({
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    asNavFor: ".slider-content-area",
-    dots: false,
-    arrows: false,
-    centerMode: false,
-    focusOnSelect: true,
-    fade: true,
-    loop: true,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    infinite: true,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          infinite: true,
-        }
-      },
-      {
-        breakpoint: 769,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1
-        }
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1
-        }
-      }
-    ]
-  });
-
-  $(".slider-content-area").slick({
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    arrows: true,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    loop: true,
-    focusOnSelect: true,
-    asNavFor: ".images-area",
-    infinite: true,
-    prevArrow: $('.testimonial-next-arrow'),
-    nextArrow: $('.testimonial-prev-arrow'),
-  });
-
-  //========== SLIDER ============= //
-  $('.testimonial-slider-box3').owlCarousel({
-    loop: true,
-    margin: 30,
-    nav: true,
-    dots: true,
-    items: 10,
-    navText: ["<i class='fa-solid fa-angle-up'></i>", "<i class='fa-solid fa-angle-down'></i>"],
-    autoplay: true,
-    smartSpeed: 1500,
-    autoplayTimeout: 3000,
-    responsiveClass: true,
-    responsive: {
-      0: {
-        items: 1,
-      },
-      600: {
-        items: 1,
-      },
-      1000: {
-        items: 1,
-      }
-    }
-  });
-
-  //========== SLIDER ============= //
-  $('.loaction-slider-property').owlCarousel({
-    loop: true,
-    margin: 30,
-    nav: true,
-    dots: true,
-    items: 10,
-    navText: ["<i class='fa-solid fa-angle-left'></i>", "<i class='fa-solid fa-angle-right'></i>"],
-    autoplay: true,
-    smartSpeed: 1500,
-    autoplayTimeout: 3000,
-    responsiveClass: true,
-    responsive: {
-      0: {
-        items: 2,
-      },
-      600: {
-        items: 3,
-      },
-      1000: {
-        items: 5,
-      }
-    }
-  });
-
-  //========== SLIDER ============= //
-  $('.slider-section-boxarea').owlCarousel({
-    loop: true,
-    margin: 30,
-    nav: false,
-    dots: false,
-    items: 10,
-    autoplay: true,
-    smartSpeed: 1500,
-    autoplayTimeout: 3000,
-    responsiveClass: true,
-    responsive: {
-      0: {
-        items: 1,
-      },
-      600: {
-        items: 2,
-      },
-      1000: {
-        items: 4,
-      }
-    }
-  });
-
-  //========== SLIDER ============= //
-  $('.images-area-lightbox').owlCarousel({
-    loop: true,
-    margin: 30,
-    nav: true,
-    dots: true,
-    items: 10,
-    navText: ["<i class='fa-solid fa-angle-left'></i>", "<i class='fa-solid fa-angle-right'></i>"],
-    responsiveClass: true,
-    responsive: {
-      0: {
-        items: 1,
-      },
-      600: {
-        items: 1,
-      },
-      1000: {
-        items: 1,
-      }
-    }
-  });
-
-
-  //========== SLIDER ============= //
-  $('.property-details-slider').owlCarousel({
-    loop: true,
-    margin: 30,
-    nav: false,
-    dots: true,
-    items: 10,
-    autoplay: true,
-    smartSpeed: 1500,
-    autoplayTimeout: 3000,
-    responsiveClass: true,
-    responsive: {
-      0: {
-        items: 1,
-      },
-      600: {
-        items: 2,
-      },
-      1000: {
-        items: 3,
-      }
-    }
-  });
-
-  //========== SLIDER ============= //
-  $('.img2-carousel').owlCarousel({
-    loop: true,
-    margin: 30,
-    nav: true,
-    dots: true,
-    items: 10,
-    autoplay: true,
-    smartSpeed: 1500,
-    autoplayTimeout: 3000,
-    responsiveClass: true,
-    responsive: {
-      0: {
-        items: 1,
-      },
-      600: {
-        items: 1,
-      },
-      1000: {
-        items: 1,
-      }
-    }
-  });
-
-
-  //========== SLIDER ============= //
-  $('.single-slider-area').owlCarousel({
-    loop: true,
-    margin: 30,
-    nav: false,
-    dots: true,
-    items: 10,
-    autoplay: true,
-    smartSpeed: 1500,
-    autoplayTimeout: 3000,
-    responsiveClass: true,
-    responsive: {
-      0: {
-        items: 1,
-      },
-      600: {
-        items: 2,
-      },
-      1000: {
-        items: 3,
-      }
-    }
-  });
-  $(".img3-carousel").slick({
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    arrows: true,
-    infinite: false,
-    infinite: true,
-    asNavFor: '.img4',
-    prevArrow: $('.next-arrow'),
-    nextArrow: $('.prev-arrow'),
-  });
-  $(".img4").slick({
-    slidesToShow: 4,
-    slidesToScroll: 4,
-    items: 15,
-    arrows: true,
-    asNavFor: ".img3-carousel",
-    infinite: true,
-    focusOnSelect: true,
-    infinite: true,
-    prevArrow: $('.next-arrow'),
-    nextArrow: $('.-prev-arrow'),
-  });
-  //========== SLIDER ============= //
-
-  //========== PRELOADER ============= //
-  $(window).on("load", function (event) {
-    setTimeout(function () {
-      $(".preloader").fadeToggle();
-    }, 200);
-
-  });
-  //========== PRELOADER BAR AREA ============= //
-
-})(jQuery);
-
-//========== TEXT_ANIMATION AREA ============= //
-if ($('.text-anime-style-1').length) {
-  let staggerAmount = 0.05,
-    translateXValue = 0,
-    delayValue = 0.5,
-    animatedTextElements = document.querySelectorAll('.text-anime-style-1');
-
-  animatedTextElements.forEach((element) => {
-    let animationSplitText = new SplitText(element, { type: "chars, words" });
-    gsap.from(animationSplitText.words, {
-      duration: 1,
-      delay: delayValue,
-      x: 20,
-      autoAlpha: 0,
-      stagger: staggerAmount,
-      scrollTrigger: { trigger: element, start: "top 85%" },
-    });
-  });
-}
-
-if ($('.text-anime-style-2').length) {
-  let staggerAmount = 0.05,
-    translateXValue = 20,
-    delayValue = 0.5,
-    easeType = "power2.out",
-    animatedTextElements = document.querySelectorAll('.text-anime-style-2');
-
-  animatedTextElements.forEach((element) => {
-    let animationSplitText = new SplitText(element, { type: "chars, words" });
-    gsap.from(animationSplitText.chars, {
-      duration: 1,
-      delay: delayValue,
-      x: translateXValue,
-      autoAlpha: 0,
-      stagger: staggerAmount,
-      ease: easeType,
-      scrollTrigger: { trigger: element, start: "top 85%" },
-    });
-  });
-}
-
-if ($('.text-anime-style-3').length) {
-  let animatedTextElements = document.querySelectorAll('.text-anime-style-3');
-
-  animatedTextElements.forEach((element) => {
-    if (element.animation) {
-      element.animation.progress(1).kill();
-      element.split.revert();
-    }
-
-    element.split = new SplitText(element, {
-      type: "lines,words,chars",
-      linesClass: "split-line",
-    });
-    gsap.set(element, { perspective: 400 });
-
-    gsap.set(element.split.chars, {
-      opacity: 0,
-      x: "50",
+    //Dropdown Button
+    $(".main-header li.dropdown2 .dropdown2-btn").on("click", function () {
+      $(this).prev("ul").slideToggle(500);
     });
 
-    element.animation = gsap.to(element.split.chars, {
-      scrollTrigger: { trigger: element, start: "top 90%" },
-      x: "0",
-      y: "0",
-      rotateX: "0",
-      opacity: 1,
-      duration: 1,
-      ease: Back.easeOut,
-      stagger: 0.02,
-    });
-  });
-}
-//========== TEXT_ANIMATION AREA ============= //
-
-//========== IMAGE ANIMATION ============= //
-if ($('.reveal').length) { gsap.registerPlugin(ScrollTrigger); let revealContainers = document.querySelectorAll(".reveal"); revealContainers.forEach((container) => { let image = container.querySelector("img"); let tl = gsap.timeline({ scrollTrigger: { trigger: container, toggleActions: "play none none none" } }); tl.set(container, { autoAlpha: 1 }); tl.from(container, 1.5, { xPercent: -100, ease: Power2.out }); tl.from(image, 1.5, { xPercent: 100, scale: 1.3, delay: -1.5, ease: Power2.out }); }); }
-//========== IMAGE ANIMATION ============= //
-
-//========== SWIPER SLIDER ============= //
-document.addEventListener("DOMContentLoaded", function () {
-  var swiper3 = new Swiper(".swiper-thumb2", {
-    spaceBetween: 10,
-    slidesPerView: 6,
-    freeMode: true,
-    watchSlidesProgress: true,
-    autoplay: {
-      delay: 2500,
-      disableOnInteraction: false,
-    },
-  });
-  var swiper4 = new Swiper(".swiper-testimonial-2", {
-    spaceBetween: 10,
-    loop: true,
-    navigation: {
-      nextEl: ".swiper-button-next",
-      prevEl: ".swiper-button-prev",
-    },
-    autoplay: {
-      delay: 2500,
-      disableOnInteraction: false,
-    },
-    thumbs: {
-      swiper: swiper3,
-    },
-  });
-
-  var swiperFades = document.querySelectorAll(".swiper-fade");
-
-  swiperFades.forEach(function (swiperFade, index) {
-    var swiper = new Swiper(swiperFade, {
-      spaceBetween: 0,
-      slidesPerView: 1,
-      freeMode: true,
-      watchSlidesProgress: true,
-      autoplay: {
-        delay: 2500,
-      },
-      pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-      },
-      navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev',
-      },
-    });
-  });
-
-});
-//========== SHOW FORM ============= //
-
-//========== SHOW FORM ============= //
-var showform = function () {
-  if ($(".show-form").length > 0) {
-    $(".show-form").on("click", function (e) {
+    //Disable dropdown parent link
+    $(".navigation li.dropdown2 > a").on("click", function (e) {
       e.preventDefault();
-      $(this).toggleClass("click");
-      $(".wd-search-form").toggleClass("show-box");
+    });
+
+    //Disable dropdown parent link
+    $(
+      ".main-header .navigation li.dropdown2 > a,.hidden-bar .side-menu li.dropdown2 > a"
+    ).on("click", function (e) {
+      e.preventDefault();
+    });
+
+    $(".price-block .features .arrow").on("click", function (e) {
+      $(e.target.offsetParent.offsetParent.offsetParent).toggleClass(
+        "active-show-hidden"
+      );
     });
   }
-};
-//========== SHOW FORM ============= //
-function initializeSlider(minId, maxId, fillClass, outputId, formatCallback) {
-  const minRange = document.getElementById(minId);
-  const maxRange = document.getElementById(maxId);
-  const sliderFill = document.querySelector(`.${fillClass}`);
-  const output = document.getElementById(outputId);
 
-  // Exit silently if any required element is missing
-  if (!minRange || !maxRange || !sliderFill || !output) {
-    return;
-  }
+  // Mobile Nav Hide Show
+  if ($(".mobile-menu").length) {
+    //$('.mobile-menu .menu-box').mCustomScrollbar();
 
-  function updateSlider() {
-    const minValue = parseInt(minRange.value, 10);
-    const maxValue = parseInt(maxRange.value, 10);
-    const totalRange = maxRange.max - minRange.min;
+    var mobileMenuContent = $(".main-header .nav-outer .main-menu").html();
+    $(".mobile-menu .menu-box .menu-outer").append(mobileMenuContent);
+    $(".sticky-header .main-menu").append(mobileMenuContent);
 
-    if (minValue > maxValue) return;
-
-    const minPercent = ((minValue - minRange.min) / totalRange) * 100;
-    const maxPercent = ((maxValue - minRange.min) / totalRange) * 100;
-
-    sliderFill.style.left = `${minPercent}%`;
-    sliderFill.style.width = `${maxPercent - minPercent}%`;
-
-    output.textContent = formatCallback(minValue, maxValue);
-  }
-
-  minRange.addEventListener("input", updateSlider);
-  maxRange.addEventListener("input", updateSlider);
-  updateSlider();
-}
-
-// Initialize sliders
-initializeSlider(
-  "price-range-min",
-  "price-range-max",
-  "price-slider .slider-fill",
-  "price-output",
-  (min, max) => `$${min.toLocaleString()} - $${max.toLocaleString()}`
-);
-
-initializeSlider(
-  "size-range-min",
-  "size-range-max",
-  "size-slider .slider-fill",
-  "size-output",
-  (min, max) => `${min} SqFt - ${max} SqFt`
-);
-
-
-
-//========== RANGE SLIDER ============= //
-
-//========== HEADING TEXT ANIMATION ============= //
-var words = ['Fast And Smarter', 'Fits Dream Home', 'Fits Perfectly',],
-  part,
-  i = 0,
-  offset = 0,
-  len = words.length,
-  forwards = true,
-  skip_count = 0,
-  skip_delay = 15,
-  speed = 70;
-var wordflick = function () {
-  setInterval(function () {
-    if (forwards) {
-      if (offset >= words[i].length) {
-        ++skip_count;
-        if (skip_count == skip_delay) {
-          forwards = false;
-          skip_count = 0;
+    //Hide / Show Submenu
+    $(".mobile-menu .navigation > li.dropdown2 > .dropdown2-btn").on(
+      "click",
+      function (e) {
+        e.preventDefault();
+        var target = $(this).parent("li").children("ul");
+        var args = { duration: 300 };
+        if ($(target).is(":visible")) {
+          $(this).parent("li").removeClass("open");
+          $(target).slideUp(args);
+          $(this)
+            .parents(".navigation")
+            .children("li.dropdown2")
+            .removeClass("open");
+          $(this)
+            .parents(".navigation")
+            .children("li.dropdown2 > ul")
+            .slideUp(args);
+          return false;
+        } else {
+          $(this)
+            .parents(".navigation")
+            .children("li.dropdown2")
+            .removeClass("open");
+          $(this)
+            .parents(".navigation")
+            .children("li.dropdown2")
+            .children("ul")
+            .slideUp(args);
+          $(this).parent("li").toggleClass("open");
+          $(this).parent("li").children("ul").slideToggle(args);
         }
       }
-    }
-    else {
-      if (offset == 0) {
-        forwards = true;
-        i++;
-        offset = 0;
-        if (i >= len) {
-          i = 0;
+    );
+
+    //3rd Level Nav
+    $(
+      ".mobile-menu .navigation > li.dropdown2 > ul  > li.dropdown2 > .dropdown2-btn"
+    ).on("click", function (e) {
+      e.preventDefault();
+      var targetInner = $(this).parent("li").children("ul");
+
+      if ($(targetInner).is(":visible")) {
+        $(this).parent("li").removeClass("open");
+        $(targetInner).slideUp(500);
+        $(this)
+          .parents(".navigation > ul")
+          .find("li.dropdown2")
+          .removeClass("open");
+        $(this)
+          .parents(".navigation > ul")
+          .find("li.dropdown > ul")
+          .slideUp(500);
+        return false;
+      } else {
+        $(this)
+          .parents(".navigation > ul")
+          .find("li.dropdown2")
+          .removeClass("open");
+        $(this)
+          .parents(".navigation > ul")
+          .find("li.dropdown2 > ul")
+          .slideUp(500);
+        $(this).parent("li").toggleClass("open");
+        $(this).parent("li").children("ul").slideToggle(500);
+      }
+    });
+
+    //Menu Toggle Btn
+    $(".mobile-nav-toggler").on("click", function () {
+      $("body").addClass("mobile-menu-visible");
+    });
+
+    //Menu Toggle Btn
+    $(".mobile-menu .menu-backdrop, .close-btn").on("click", function () {
+      $("body").removeClass("mobile-menu-visible");
+      $(".mobile-menu .navigation > li").removeClass("open");
+      $(".mobile-menu .navigation li ul").slideUp(0);
+    });
+
+    $(document).keydown(function (e) {
+      if (e.keyCode === 27) {
+        $("body").removeClass("mobile-menu-visible");
+        $(".mobile-menu .navigation > li").removeClass("open");
+        $(".mobile-menu .navigation li ul").slideUp(0);
+      }
+    });
+  }
+
+  var ajaxSubscribe = {
+    obj: {
+      subscribeEmail: $("#subscribe-email"),
+      subscribeButton: $("#subscribe-button"),
+      subscribeMsg: $("#subscribe-msg"),
+      subscribeContent: $("#subscribe-content"),
+      dataMailchimp: $("#subscribe-form").attr("data-mailchimp"),
+      success_message:
+        '<div class="notification_ok">Thank you for joining our mailing list! Please check your email for a confirmation link.</div>',
+      failure_message:
+        '<div class="notification_error">Error! <strong>There was a problem processing your submission.</strong></div>',
+      noticeError: '<div class="notification_error">{msg}</div>',
+      noticeInfo: '<div class="notification_error">{msg}</div>',
+      basicAction: "mail/subscribe.php",
+      mailChimpAction: "mail/subscribe-mailchimp.php",
+    },
+
+    eventLoad: function () {
+      var objUse = ajaxSubscribe.obj;
+
+      $(objUse.subscribeButton).on("click", function () {
+        if (window.ajaxCalling) return;
+        var isMailchimp = objUse.dataMailchimp === "true";
+
+        if (isMailchimp) {
+          ajaxSubscribe.ajaxCall(objUse.mailChimpAction);
+        } else {
+          ajaxSubscribe.ajaxCall(objUse.basicAction);
         }
+      });
+    },
+
+    ajaxCall: function (action) {
+      window.ajaxCalling = true;
+      var objUse = ajaxSubscribe.obj;
+      var messageDiv = objUse.subscribeMsg.html("").hide();
+      $.ajax({
+        url: action,
+        type: "POST",
+        dataType: "json",
+        data: {
+          subscribeEmail: objUse.subscribeEmail.val(),
+        },
+        success: function (responseData, textStatus, jqXHR) {
+          if (responseData.status) {
+            objUse.subscribeContent.fadeOut(500, function () {
+              messageDiv.html(objUse.success_message).fadeIn(500);
+            });
+          } else {
+            switch (responseData.msg) {
+              case "email-required":
+                messageDiv.html(
+                  objUse.noticeError.replace(
+                    "{msg}",
+                    "Error! <strong>Email is required.</strong>"
+                  )
+                );
+                break;
+              case "email-err":
+                messageDiv.html(
+                  objUse.noticeError.replace(
+                    "{msg}",
+                    "Error! <strong>Email invalid.</strong>"
+                  )
+                );
+                break;
+              case "duplicate":
+                messageDiv.html(
+                  objUse.noticeError.replace(
+                    "{msg}",
+                    "Error! <strong>Email is duplicate.</strong>"
+                  )
+                );
+                break;
+              case "filewrite":
+                messageDiv.html(
+                  objUse.noticeInfo.replace(
+                    "{msg}",
+                    "Error! <strong>Mail list file is open.</strong>"
+                  )
+                );
+                break;
+              case "undefined":
+                messageDiv.html(
+                  objUse.noticeInfo.replace(
+                    "{msg}",
+                    "Error! <strong>undefined error.</strong>"
+                  )
+                );
+                break;
+              case "api-error":
+                objUse.subscribeContent.fadeOut(500, function () {
+                  messageDiv.html(objUse.failure_message);
+                });
+            }
+            messageDiv.fadeIn(500);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          alert("Connection error");
+        },
+        complete: function (data) {
+          window.ajaxCalling = false;
+        },
+      });
+    },
+  };
+
+  /* alert box
+  ------------------------------------------------------------------------------------- */
+  var alertBox = function () {
+    $(document).on("click", ".close", function (e) {
+      $(this).closest(".flat-alert").remove();
+      e.preventDefault();
+    });
+  };
+
+    /* footer accordion
+  -------------------------------------------------------------------------*/
+  var handleFooter = function () {
+    var footerAccordion = function () {
+      var args = { duration: 250 };
+      $(".footer-heading-mobile").on("click", function () {
+        $(this).parent(".footer-col-block").toggleClass("open");
+        if (!$(this).parent(".footer-col-block").is(".open")) {
+          $(this).next().slideUp(args);
+        } else {
+          $(this).next().slideDown(args);
+        }
+      });
+    };
+    function handleAccordion() {
+      if (matchMedia("only screen and (max-width: 767px)").matches) {
+        if (!$(".footer-heading-mobile").data("accordion-initialized")) {
+          footerAccordion();
+          $(".footer-heading-mobile").data("accordion-initialized", true); 
+        }
+      } else {
+        $(".footer-heading-mobile").off("click");
+        $(".footer-heading-mobile").parent(".footer-col-block").removeClass("open");
+        $(".footer-heading-mobile").next().removeAttr("style");
+        $(".footer-heading-mobile").data("accordion-initialized", false); 
       }
     }
-    part = words[i].substr(0, offset);
-    if (skip_count == 0) {
-      if (forwards) {
-        offset++;
-      }
-      else {
-        offset--;
-      }
-    }
-    $('.word').text(part);
-  }, speed);
-};
-
-$(document).ready(function () {
-  wordflick();
-});
-//========== HEADING TEXT ANIMATION ============= //
+    handleAccordion();
+    window.addEventListener("resize", function () {
+      handleAccordion();
+    });  
+  };
 
 
-
-//TOGGLE SEARCH filter FORM
-
-// Select the toggle button and the search filter form
-const openSearchButton = document.querySelector('.open-search-filter-form');
-const searchFilterForm = document.querySelector('.search-filter-form');
-
-// Check if both elements exist before adding event listeners
-if (openSearchButton && searchFilterForm) {
-  // Add click event listener to the button
-  openSearchButton.addEventListener('click', () => {
-    // Toggle 'active' class on both the button and the search form
-    openSearchButton.classList.toggle('active');
-    searchFilterForm.classList.toggle('active');
+  // Dom Ready
+  $(function () {
+    $(window).on("load resize", function () {
+      retinaLogos();
+    });
+    headerFixed();
+    ajaxContactForm();
+    ajaxSubscribe.eventLoad();
+    alertBox();
+    handleFooter();
   });
-}
-
-
-// Select the toggle button and the filter options form
-const toggleFilterButton = document.querySelector('.open-filter-form');
-const filterOptionsForm = document.querySelector('.filter-options-form');
-
-// Check if both elements exist before adding event listeners
-if (toggleFilterButton && filterOptionsForm) {
-  // Add click event listener to the button
-  toggleFilterButton.addEventListener('click', () => {
-    // Toggle 'active' class on the button
-    toggleFilterButton.classList.toggle('active');
-    // Toggle 'active' class on the filter form
-    filterOptionsForm.classList.toggle('active');
-  });
-}
-
-
+})(jQuery);
