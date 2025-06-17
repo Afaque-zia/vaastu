@@ -34,7 +34,7 @@
       });
 
       // Run on Window Load
-      self.config.$window.on("load", function () {});
+      self.config.$window.on("load", function () { });
     },
   }; // end themesflatTheme
 
@@ -131,11 +131,11 @@
           if ($(window).scrollTop() > 0) {
             nav.addClass("is-fixed");
             injectSpace.show();
-            $("#trans-logo").attr("src", "images/logo/logo@2x.png");
+            $("#trans-logo").attr("src", "assets/images/logo/logo@2x.png");
           } else {
             nav.removeClass("is-fixed");
             injectSpace.hide();
-            $("#trans-logo").attr("src", "images/logo/logo@2x-white.png");
+            $("#trans-logo").attr("src", "assets/images/logo/logo@2x-white.png");
           }
         });
       }
@@ -393,8 +393,8 @@
     });
   };
 
-    /* footer accordion
-  -------------------------------------------------------------------------*/
+  /* footer accordion
+-------------------------------------------------------------------------*/
   var handleFooter = function () {
     var footerAccordion = function () {
       var args = { duration: 250 };
@@ -411,19 +411,19 @@
       if (matchMedia("only screen and (max-width: 767px)").matches) {
         if (!$(".footer-heading-mobile").data("accordion-initialized")) {
           footerAccordion();
-          $(".footer-heading-mobile").data("accordion-initialized", true); 
+          $(".footer-heading-mobile").data("accordion-initialized", true);
         }
       } else {
         $(".footer-heading-mobile").off("click");
         $(".footer-heading-mobile").parent(".footer-col-block").removeClass("open");
         $(".footer-heading-mobile").next().removeAttr("style");
-        $(".footer-heading-mobile").data("accordion-initialized", false); 
+        $(".footer-heading-mobile").data("accordion-initialized", false);
       }
     }
     handleAccordion();
     window.addEventListener("resize", function () {
       handleAccordion();
-    });  
+    });
   };
 
 
